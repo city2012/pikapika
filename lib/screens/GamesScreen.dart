@@ -4,8 +4,10 @@ import 'package:pikapika/basic/Entities.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/screens/components/ContentBuilder.dart';
 
+import '../basic/config/IconLoading.dart';
 import 'GameInfoScreen.dart';
 import 'components/Images.dart';
+import 'components/ListView.dart';
 import 'components/RightClickPop.dart';
 
 // 游戏列表
@@ -170,7 +172,7 @@ class _GamesScreenState extends State<GamesScreen> {
                 ),
               ),
             ),
-            body: ListView(
+            body: PikaListView(
               children: [
                 ...wraps,
                 ...page.page < page.pages
@@ -222,7 +224,7 @@ class GameCard extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                mixRoute(
                     builder: (context) => GameInfoScreen(info.id)),
               );
             },

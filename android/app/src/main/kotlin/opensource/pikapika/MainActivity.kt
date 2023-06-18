@@ -1,7 +1,6 @@
-package niuhuan.pikapika
+package opensource.pikapika
 
 import android.content.ContentValues
-import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.hardware.biometrics.BiometricPrompt
@@ -103,6 +102,11 @@ class MainActivity : FlutterActivity() {
                     "androidGetExtendDirs" -> androidGetExtendDirs()
                     "androidSecureFlag" -> androidSecureFlag(call.argument("flag")!!)
                     "verifyAuthentication" -> auth()
+                    "androidStorageRoot" -> storageRoot()
+                    "androidDefaultExportsDir" -> androidDefaultExportsDir().absolutePath
+                    "androidMkdirs" -> androidMkdirs(
+                        call.arguments<String>() ?: throw Exception("need arg")
+                    )
                     else -> {
                         notImplementedToken
                     }
@@ -405,5 +409,27 @@ class MainActivity : FlutterActivity() {
         return queue.poll(5, TimeUnit.MINUTES) ?: false
     }
 
+    fun storageRoot(): String {
+        return Environment.getExternalStorageDirectory().absolutePath
+    }
 
+    private fun downloadsDir(): File {
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            ?: throw java.lang.IllegalStateException()
+    }
+
+    private fun defaultPikapikaDir(): File {
+        return File(downloadsDir(), "pikapika")
+    }
+
+    private fun androidDefaultExportsDir(): File {
+        return File(defaultPikapikaDir(), "exports")
+    }
+
+    private fun androidMkdirs(path: String) {
+        val dir = File(path)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+    }
 }

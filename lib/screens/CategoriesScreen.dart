@@ -1,6 +1,6 @@
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart' as fsb;
 import 'package:pikapika/basic/Entities.dart';
 import 'package:pikapika/basic/config/ShadowCategoriesEvent.dart';
 import 'package:pikapika/basic/config/ShadowCategoriesMode.dart';
@@ -11,12 +11,16 @@ import 'package:pikapika/screens/RankingsScreen.dart';
 import 'package:pikapika/screens/SearchScreen.dart';
 import 'package:pikapika/screens/components/ContentError.dart';
 import 'package:pikapika/basic/Method.dart';
+import '../basic/config/Address.dart';
 import '../basic/config/CategoriesColumnCount.dart';
+import '../basic/config/IconLoading.dart';
 import 'ComicsScreen.dart';
 import 'GamesScreen.dart';
 import 'RandomComicsScreen.dart';
+import 'components/Common.dart';
 import 'components/ContentLoading.dart';
 import 'components/Images.dart';
+import 'components/ListView.dart';
 
 // 分类
 class CategoriesScreen extends StatefulWidget {
@@ -27,7 +31,7 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  late final SearchBar _searchBar = SearchBar(
+  late final fsb.SearchBar _searchBar = fsb.SearchBar(
     hintText: '搜索',
     inBar: false,
     setState: setState,
@@ -35,7 +39,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       if (value.isNotEmpty) {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          mixRoute(
             builder: (context) => SearchScreen(keyword: value),
           ),
         );
@@ -45,7 +49,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       return AppBar(
         title: const Text('分类'),
         actions: [
-          shadowCategoriesActionButton(context),
+          commonPopMenu(context),
+          addressPopMenu(context),
           _searchBar.getSearchAction(context),
         ],
       );
@@ -123,7 +128,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             if (snapshot.connectionState != ConnectionState.done) {
               return const ContentLoading(label: '加载中');
             }
-            return ListView(
+            return PikaListView(
               children: [
                 Container(height: 20),
                 Wrap(
@@ -211,7 +216,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       () {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          mixRoute(
             builder: (context) => const ComicCollectionsScreen(),
           ),
         );
@@ -300,7 +305,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const RankingsScreen()),
+          mixRoute(builder: (context) => const RankingsScreen()),
         );
       },
     );
@@ -312,7 +317,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const RandomComicsScreen()),
+          mixRoute(builder: (context) => const RandomComicsScreen()),
         );
       },
     );
@@ -324,7 +329,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const GamesScreen()),
+          mixRoute(builder: (context) => const GamesScreen()),
         );
       },
     );
@@ -335,7 +340,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void _navigateToCategory(String? categoryTitle) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      mixRoute(
         builder: (context) => ComicsScreen(category: categoryTitle),
       ),
     );

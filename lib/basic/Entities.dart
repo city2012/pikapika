@@ -979,6 +979,7 @@ class PkzComicViewLog {
     required this.lastViewPictureRank,
     required this.lastViewTime,
   });
+
   late final String fileName;
   late final String lastViewComicId;
   late final String filePath;
@@ -988,7 +989,7 @@ class PkzComicViewLog {
   late final int lastViewPictureRank;
   late final String lastViewTime;
 
-  PkzComicViewLog.fromJson(Map<String, dynamic> json){
+  PkzComicViewLog.fromJson(Map<String, dynamic> json) {
     fileName = json['fileName'];
     lastViewComicId = json['lastViewComicId'];
     filePath = json['filePath'];
@@ -1013,12 +1014,133 @@ class PkzComicViewLog {
   }
 }
 
-class IsPro {
-  late bool isPro;
-  late int expire;
+class ProInfoAll {
+  ProInfoAll({
+    required this.proInfoAf,
+    required this.proInfoPat,
+  });
+  late final ProInfoAf proInfoAf;
+  late final ProInfoPat proInfoPat;
 
-  IsPro.fromJson(Map<String, dynamic> json) {
-    this.isPro = json["isPro"];
-    this.expire = json["expire"];
+  ProInfoAll.fromJson(Map<String, dynamic> json){
+    proInfoAf = ProInfoAf.fromJson(json['pro_info_af']);
+    proInfoPat = ProInfoPat.fromJson(json['pro_info_pat']);
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['pro_info_normal'] = proInfoAf.toJson();
+    _data['pro_info_pat'] = proInfoPat.toJson();
+    return _data;
+  }
+}
+
+class ProInfoAf {
+  ProInfoAf({
+    required this.isPro,
+    required this.expire,
+  });
+  late final bool isPro;
+  late final int expire;
+
+  ProInfoAf.fromJson(Map<String, dynamic> json){
+    isPro = json['is_pro'];
+    expire = json['expire'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['is_pro'] = isPro;
+    _data['expire'] = expire;
+    return _data;
+  }
+}
+
+class ProInfoPat {
+  ProInfoPat({
+    required this.isPro,
+    required this.patId,
+    required this.bindUid,
+    required this.requestDelete,
+    required this.reBind,
+    required this.errorType,
+    required this.errorMsg,
+    required this.accessKey,
+  });
+  late final bool isPro;
+  late final String patId;
+  late final String bindUid;
+  late final int requestDelete;
+  late final int reBind;
+  late final int errorType;
+  late final String errorMsg;
+  late final String accessKey;
+
+  ProInfoPat.fromJson(Map<String, dynamic> json){
+    isPro = json['is_pro'];
+    patId = json['pat_id'];
+    bindUid = json['bind_uid'];
+    requestDelete = json['request_delete'];
+    reBind = json['re_bind'];
+    errorType = json['error_type'];
+    errorMsg = json['error_msg'];
+    accessKey = json['access_key'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['is_pro'] = isPro;
+    _data['pat_id'] = patId;
+    _data['bind_uid'] = bindUid;
+    _data['request_delete'] = requestDelete;
+    _data['re_bind'] = reBind;
+    _data['error_type'] = errorType;
+    _data['error_msg'] = errorMsg;
+    _data['access_key'] = accessKey;
+    return _data;
+  }
+}
+
+class ForgotPasswordResult {
+  ForgotPasswordResult({
+    required this.question1,
+    required this.question2,
+    required this.question3,
+  });
+
+  late final String question1;
+  late final String question2;
+  late final String question3;
+
+  ForgotPasswordResult.fromJson(Map<String, dynamic> json) {
+    question1 = json['question1'];
+    question2 = json['question2'];
+    question3 = json['question3'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['question1'] = question1;
+    _data['question2'] = question2;
+    _data['question3'] = question3;
+    return _data;
+  }
+}
+
+class ResetPasswordResult {
+  ResetPasswordResult({
+    required this.password,
+  });
+
+  late final String password;
+
+  ResetPasswordResult.fromJson(Map<String, dynamic> json) {
+    password = json['password'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final _data = <String, dynamic>{};
+    _data['password'] = password;
+    return _data;
   }
 }

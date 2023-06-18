@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pikapika/basic/Common.dart';
+import 'package:pikapika/basic/config/HiddenFdIcon.dart';
 import 'package:pikapika/basic/config/Version.dart';
 import 'package:pikapika/screens/AboutScreen.dart';
 import 'package:pikapika/screens/AccountScreen.dart';
@@ -10,6 +11,7 @@ import 'package:pikapika/screens/ThemeScreen.dart';
 import 'package:pikapika/screens/ViewLogsScreen.dart';
 import 'package:pikapika/basic/Method.dart';
 
+import '../basic/config/IconLoading.dart';
 import '../basic/config/IsPro.dart';
 import '../basic/config/Themes.dart';
 import 'SettingsScreen.dart';
@@ -29,6 +31,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
   void initState() {
     versionEvent.subscribe(_onEvent);
     proEvent.subscribe(_onEvent);
+    hiddenFdIconEvent.subscribe(_onEvent);
     super.initState();
   }
 
@@ -36,6 +39,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
   void dispose() {
     versionEvent.unsubscribe(_onEvent);
     proEvent.unsubscribe(_onEvent);
+    hiddenFdIconEvent.unsubscribe(_onEvent);
     super.dispose();
   }
 
@@ -58,8 +62,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
                 await method.setPassword("");
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const AccountScreen()),
+                  mixRoute(builder: (context) => const AccountScreen()),
                 );
               }
             },
@@ -69,7 +72,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
+                mixRoute(builder: (context) => const AboutScreen()),
               );
             },
             icon: Badged(
@@ -77,22 +80,26 @@ class _SpaceScreenState extends State<SpaceScreen> {
               badge: latestVersion() == null ? null : "1",
             ),
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return const ProScreen();
-              }));
-            },
-            icon: Icon(
-              isPro ? Icons.offline_bolt : Icons.offline_bolt_outlined,
-            ),
-          ),
+          ...hiddenFdIcon
+              ? []
+              : [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context)
+                          .push(mixRoute(builder: (BuildContext context) {
+                        return const ProScreen();
+                      }));
+                    },
+                    icon: Icon(
+                      isPro ? Icons.offline_bolt : Icons.offline_bolt_outlined,
+                    ),
+                  ),
+                ],
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                mixRoute(builder: (context) => const SettingsScreen()),
               );
             },
             icon: const Icon(Icons.settings),
@@ -105,25 +112,10 @@ class _SpaceScreenState extends State<SpaceScreen> {
           const UserProfileCard(),
           const Divider(),
           ListTile(
-            onTap: () async {
-              if (androidNightModeDisplay) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ThemeScreen()),
-                );
-              } else {
-                chooseLightTheme(context);
-              }
-            },
-            title: const Text('主题'),
-          ),
-          const Divider(),
-          ListTile(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const FavouritePaperScreen()),
+                mixRoute(builder: (context) => const FavouritePaperScreen()),
               );
             },
             title: const Text('我的收藏'),
@@ -133,7 +125,7 @@ class _SpaceScreenState extends State<SpaceScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ViewLogsScreen()),
+                mixRoute(builder: (context) => const ViewLogsScreen()),
               );
             },
             title: const Text('浏览记录'),
@@ -143,34 +135,11 @@ class _SpaceScreenState extends State<SpaceScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const DownloadListScreen()),
+                mixRoute(builder: (context) => const DownloadListScreen()),
               );
             },
             title: const Text('我的下载'),
           ),
-          const Divider(),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProScreen()),
-              );
-            },
-            title: const Text('发电'),
-          ),
-          const Divider(),
-          ListTile(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutScreen()),
-                );
-              },
-              title: Badged(
-                child: const Text('关于'),
-                badge: latestVersion() == null ? null : "1",
-              )),
           const Divider(),
         ],
       ),

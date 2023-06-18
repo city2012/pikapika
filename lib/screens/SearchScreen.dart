@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart' as fsb;
 import 'package:pikapika/basic/Common.dart';
 import 'package:pikapika/basic/config/ShadowCategories.dart';
 import 'package:pikapika/basic/store/Categories.dart';
-import 'package:pikapika/basic/config/ListLayout.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/screens/components/RightClickPop.dart';
 import '../basic/Entities.dart';
+import '../basic/config/Address.dart';
+import '../basic/config/IconLoading.dart';
+import 'components/ComicList.dart';
 import 'components/ComicPager.dart';
+import 'components/Common.dart';
+import 'components/GoDownloadSelect.dart';
 
 // 搜索页面
 class SearchScreen extends StatefulWidget {
@@ -25,9 +29,10 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  late final _comicListController = ComicListController();
   late final TextEditingController _textEditController =
       TextEditingController(text: widget.keyword);
-  late final SearchBar _searchBar = SearchBar(
+  late final fsb.SearchBar _searchBar = fsb.SearchBar(
     hintText: '搜索 ${categoryTitle(widget.category)}',
     controller: _textEditController,
     inBar: false,
@@ -36,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
       if (value.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
+          mixRoute(
             builder: (context) => SearchScreen(
               keyword: value,
               category: widget.category,
@@ -49,8 +54,12 @@ class _SearchScreenState extends State<SearchScreen> {
       return AppBar(
         title: Text("${categoryTitle(widget.category)} ${widget.keyword}"),
         actions: [
-          shadowCategoriesActionButton(context),
-          chooseLayoutActionButton(context),
+          commonPopMenu(
+            context,
+            setState: setState,
+            comicListController: _comicListController,
+          ),
+          addressPopMenu(context),
           _chooseCategoryAction(),
           _searchBar.getSearchAction(context),
         ],
@@ -64,14 +73,14 @@ class _SearchScreenState extends State<SearchScreen> {
             categoryTitle(null),
             ...filteredList(
               storedCategories,
-                  (c) => !shadowCategories.contains(c),
+              (c) => !shadowCategories.contains(c),
             ),
           ]);
           if (category != null) {
             if (category == categoryTitle(null)) {
               category = null;
             }
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
+            Navigator.of(context).pushReplacement(mixRoute(
               builder: (context) {
                 return SearchScreen(
                   category: category,
@@ -98,7 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return rightClickPop(
       child: buildScreen(context),
       context: context,
@@ -108,7 +117,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget buildScreen(BuildContext context) {
     return Scaffold(
-      appBar: _searchBar.build(context),
+      appBar: _comicListController.selecting
+          ? downAppBar(context, _comicListController, setState)
+          : _searchBar.build(context),
       body: ComicPager(
         fetchPage: _fetch,
       ),

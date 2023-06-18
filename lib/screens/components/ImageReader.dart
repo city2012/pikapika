@@ -14,6 +14,7 @@ import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/basic/config/Address.dart';
 import 'package:pikapika/basic/config/FullScreenAction.dart';
 import 'package:pikapika/basic/config/ImageAddress.dart';
+import 'package:pikapika/basic/config/ImageFilter.dart';
 import 'package:pikapika/basic/config/KeyboardController.dart';
 import 'package:pikapika/basic/config/NoAnimation.dart';
 import 'package:pikapika/basic/config/Quality.dart';
@@ -23,6 +24,9 @@ import 'package:pikapika/basic/config/ReaderType.dart';
 import 'package:pikapika/basic/config/VolumeController.dart';
 import 'package:pikapika/screens/components/PkzImages.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../../basic/config/IconLoading.dart';
+import '../../basic/config/ReaderBackgroundColor.dart';
+import '../../basic/config/UseApiLoadImage.dart';
 import '../FilePhotoViewScreen.dart';
 import 'gesture_zoom_box.dart';
 
@@ -226,6 +230,8 @@ abstract class _ImageReaderContentState extends State<_ImageReaderContent> {
   // 阅读器
   Widget _buildViewer();
 
+  Widget _buildViewerProcess() => processImageFilter(_buildViewer());
+
   // 键盘, 音量键 等事件
   void _needJumpTo(int index, bool animation);
 
@@ -306,35 +312,35 @@ abstract class _ImageReaderContentState extends State<_ImageReaderContent> {
       case FullScreenAction.CONTROLLER:
         return Stack(
           children: [
-            _buildViewer(),
+            _buildViewerProcess(),
             _buildBar(_buildFullScreenControllerStackItem()),
           ],
         );
       case FullScreenAction.TOUCH_ONCE:
         return Stack(
           children: [
-            _buildTouchOnceControllerAction(_buildViewer()),
+            _buildTouchOnceControllerAction(_buildViewerProcess()),
             _buildBar(Container()),
           ],
         );
       case FullScreenAction.TOUCH_DOUBLE:
         return Stack(
           children: [
-            _buildTouchDoubleControllerAction(_buildViewer()),
+            _buildTouchDoubleControllerAction(_buildViewerProcess()),
             _buildBar(Container()),
           ],
         );
       case FullScreenAction.TOUCH_DOUBLE_ONCE_NEXT:
         return Stack(
           children: [
-            _buildTouchDoubleOnceNextControllerAction(_buildViewer()),
+            _buildTouchDoubleOnceNextControllerAction(_buildViewerProcess()),
             _buildBar(Container()),
           ],
         );
       case FullScreenAction.THREE_AREA:
         return Stack(
           children: [
-            _buildViewer(),
+            _buildViewerProcess(),
             _buildBar(_buildThreeAreaControllerAction()),
           ],
         );
@@ -559,38 +565,38 @@ abstract class _ImageReaderContentState extends State<_ImageReaderContent> {
         !widget.struct.fullScreen) {
       return Container();
     }
-    if (widget.readerSliderPosition == ReaderSliderPosition.RIGHT ) {
+    if (widget.readerSliderPosition == ReaderSliderPosition.RIGHT) {
       return SafeArea(
           child: Align(
-            alignment: Alignment.bottomRight,
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                padding:
+        alignment: Alignment.bottomRight,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding:
                 const EdgeInsets.only(left: 10, right: 10, top: 4, bottom: 4),
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    bottomLeft: Radius.circular(10),
-                  ),
-                  color: Color(0x88000000),
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    widget.struct.onFullScreenChange(!widget.struct.fullScreen);
-                  },
-                  child: Icon(
-                    widget.struct.fullScreen
-                        ? Icons.fullscreen_exit
-                        : Icons.fullscreen_outlined,
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                ),
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                bottomLeft: Radius.circular(10),
+              ),
+              color: Color(0x88000000),
+            ),
+            child: GestureDetector(
+              onTap: () {
+                widget.struct.onFullScreenChange(!widget.struct.fullScreen);
+              },
+              child: Icon(
+                widget.struct.fullScreen
+                    ? Icons.fullscreen_exit
+                    : Icons.fullscreen_outlined,
+                size: 30,
+                color: Colors.white,
               ),
             ),
-          ));
+          ),
+        ),
+      ));
     }
     return SafeArea(
         child: Align(
@@ -902,19 +908,26 @@ class _SettingPanelState extends State<_SettingPanel> {
         Row(
           children: [
             _bottomIcon(
-              icon: Icons.shuffle,
+              icon: Icons.share,
               title: currentAddressName(),
               onPressed: () async {
-                await chooseAddress(context);
+                await chooseAddressAndSwitch(context);
                 setState(() {});
               },
             ),
             _bottomIcon(
-              icon: Icons.repeat_one,
+              icon: Icons.image_search,
               title: currentImageAddressName(),
               onPressed: () async {
                 await chooseImageAddress(context);
                 setState(() {});
+              },
+            ),
+            _bottomIcon(
+              icon: Icons.network_ping,
+              title: currentUseApiLoadImageName(),
+              onPressed: () {
+                chooseUseApiLoadImage(context);
               },
             ),
             _bottomIcon(
@@ -925,13 +938,15 @@ class _SettingPanelState extends State<_SettingPanel> {
                 widget.onReloadEp();
               },
             ),
-            _bottomIcon(
-              icon: Icons.file_download,
-              title: "下载本作",
-              onPressed: widget.onDownload,
-            ),
           ],
         ),
+        // Row(children: [
+        //   _bottomIcon(
+        //     icon: Icons.file_download,
+        //     title: "下载本作",
+        //     onPressed: widget.onDownload,
+        //   ),
+        // ]),
       ],
     );
   }
@@ -1038,8 +1053,8 @@ class _WebToonReaderState extends _ImageReaderContentState {
   @override
   Widget _buildViewer() {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black,
+      decoration: BoxDecoration(
+        color: readerBackgroundColorObj,
       ),
       child: _buildList(),
     );
@@ -1166,7 +1181,7 @@ class _WebToonReaderState extends _ImageReaderContentState {
             Navigator.of(context).pop();
           }
         },
-        textColor: Colors.white,
+        textColor: invertColor(readerBackgroundColorObj),
         child: Container(
           padding: const EdgeInsets.only(top: 40, bottom: 40),
           child: Text(super._hasNextEp() ? '下一章' : '结束阅读'),
@@ -1382,8 +1397,8 @@ class _ListViewReaderState extends _ImageReaderContentState
   @override
   Widget _buildViewer() {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black,
+      decoration: BoxDecoration(
+        color: readerBackgroundColorObj,
       ),
       child: _buildList(),
     );
@@ -1517,7 +1532,7 @@ class _ListViewReaderState extends _ImageReaderContentState
             Navigator.of(context).pop();
           }
         },
-        textColor: Colors.white,
+        textColor: invertColor(readerBackgroundColorObj),
         child: Container(
           padding: const EdgeInsets.only(top: 40, bottom: 40),
           child: Text(super._hasNextEp() ? '下一章' : '结束阅读'),
@@ -1597,7 +1612,7 @@ class _GalleryReaderState extends _ImageReaderContentState {
           ? Axis.vertical
           : Axis.horizontal,
       reverse: widget.pagerDirection == ReaderDirection.RIGHT_TO_LEFT,
-      backgroundDecoration: const BoxDecoration(color: Colors.black),
+      backgroundDecoration: BoxDecoration(color: readerBackgroundColorObj),
       loadingBuilder: (context, event) => LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return buildLoading(constraints.maxWidth, constraints.maxHeight);
@@ -1680,7 +1695,7 @@ class _GalleryReaderState extends _ImageReaderContentState {
             case '预览图片':
               try {
                 var file = await load();
-                Navigator.of(context).push(MaterialPageRoute(
+                Navigator.of(context).push(mixRoute(
                   builder: (context) => FilePhotoViewScreen(file),
                 ));
               } catch (e) {
@@ -1740,13 +1755,24 @@ class _GalleryReaderState extends _ImageReaderContentState {
                 Navigator.of(context).pop();
               }
             },
-            child: Text(_hasNextEp() ? '下一章' : '结束阅读',
-                style: const TextStyle(color: Colors.white)),
+            child: Text(
+              _hasNextEp() ? '下一章' : '结束阅读',
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+Color invertColor(Color color) {
+  return Color.fromRGBO(
+    255 - color.red,
+    255 - color.green,
+    255 - color.blue,
+    1.0,
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

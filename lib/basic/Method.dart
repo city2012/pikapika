@@ -59,6 +59,14 @@ class Method {
     return await _flatInvoke("setImageSwitchAddress", switchAddress);
   }
 
+  Future<String> getUseApiClientLoadImage() async {
+    return await _flatInvoke("getUseApiClientLoadImage", "");
+  }
+
+  Future<dynamic> setUseApiClientLoadImage(String switchAddress) async {
+    return await _flatInvoke("setUseApiClientLoadImage", switchAddress);
+  }
+
   /// 获取代理
   Future<String> getProxy() async {
     return await _flatInvoke("getProxy", "");
@@ -504,8 +512,10 @@ class Method {
   }
 
   /// 所有下载
-  Future<List<DownloadComic>> allDownloads() async {
-    var data = await _flatInvoke("allDownloads", "");
+  Future<List<DownloadComic>> allDownloads(String search) async {
+    var data = await _flatInvoke("allDownloads", {
+      "search": search,
+    });
     data = jsonDecode(data);
     if (data == null) {
       return [];
@@ -557,6 +567,19 @@ class Method {
     });
   }
 
+  /// 导出下载的图片到HTML+JPG (即使没有下载完成)
+  Future<dynamic> exportComicJpegsEvenNotFinish(
+    String comicId,
+    String dir,
+    String name,
+  ) {
+    return _flatInvoke("exportComicJpegsEvenNotFinish", {
+      "comicId": comicId,
+      "dir": dir,
+      "name": name,
+    });
+  }
+
   /// 导出下载的图片到HTML+JPG
   Future<dynamic> exportComicDownloadToJPG(
     String comicId,
@@ -564,6 +587,19 @@ class Method {
     String name,
   ) {
     return _flatInvoke("exportComicDownloadToJPG", {
+      "comicId": comicId,
+      "dir": dir,
+      "name": name,
+    });
+  }
+
+  /// 导出下载的图片到HTML+JPG
+  Future<dynamic> exportComicDownloadJpegZip(
+    String comicId,
+    String dir,
+    String name,
+  ) {
+    return _flatInvoke("exportComicDownloadJpegZip", {
       "comicId": comicId,
       "dir": dir,
       "name": name,
@@ -874,8 +910,8 @@ class Method {
         .toList();
   }
 
-  Future<IsPro> isPro() async {
-    return IsPro.fromJson(jsonDecode(await _flatInvoke("isPro", "")));
+  Future<ProInfoAll> proInfoAll() async {
+    return ProInfoAll.fromJson(jsonDecode(await _flatInvoke("proInfoAll", "")));
   }
 
   Future reloadPro() {
@@ -896,5 +932,101 @@ class Method {
 
   Future<String> iosGetDocumentDir() async {
     return await _channel.invokeMethod('iosGetDocumentDir', '');
+  }
+
+  /// 找回密码1
+  Future<ForgotPasswordResult> forgotPassword(email) async {
+    String data = await _flatInvoke("forgotPassword", email);
+    return ForgotPasswordResult.fromJson(jsonDecode(data));
+  }
+
+  /// 找回密码2
+  Future<ResetPasswordResult> resetPassword(
+    String email,
+    int questionNo,
+    String answer,
+  ) async {
+    String data = await _flatInvoke("resetPassword", {
+      "email": email,
+      "questionNo": questionNo,
+      "answer": answer,
+    });
+    return ResetPasswordResult.fromJson(jsonDecode(data));
+  }
+
+  Future mergeHistoriesFromWebDav(
+    String root,
+    String username,
+    String password,
+    String file,
+  ) {
+    return _flatInvoke("mergeHistoriesFromWebDav", {
+      "root": root,
+      "username": username,
+      "password": password,
+      "file": file,
+    });
+  }
+
+  Future<int> ping(String idx) async {
+    String ms = await _flatInvoke("ping", idx);
+    return int.parse(ms);
+  }
+
+  Future<int> pingImg(String idx) async {
+    String ms = await _flatInvoke("pingImg", idx);
+    return int.parse(ms);
+  }
+
+  Future<String> androidStorageRoot() async {
+    return await _channel.invokeMethod("androidStorageRoot");
+  }
+
+  Future importComicViewFormOff(String dbPath) {
+    return _flatInvoke("importComicViewFormOff", dbPath);
+  }
+
+  Future startWebServer() {
+    return _flatInvoke("startWebServer", "");
+  }
+
+  Future stopWebServer() {
+    return _flatInvoke("stopWebServer", "");
+  }
+
+  Future<String> androidDefaultExportsDir() async {
+    return await _channel.invokeMethod("androidDefaultExportsDir");
+  }
+
+  Future getHomeDir() {
+    return _flatInvoke("getHomeDir", "");
+  }
+
+  Future mkdirs(String path) {
+    return _flatInvoke("mkdirs", path);
+  }
+
+  Future androidMkdirs(String path) async {
+    return await _channel.invokeMethod("androidMkdirs", path);
+  }
+
+  Future downloadAll(List<String> comicIds) {
+    return _flatInvoke("downloadAll", comicIds);
+  }
+
+  Future setPatAccessKey(String accessKey) {
+    return _flatInvoke("setPatAccessKey", accessKey);
+  }
+
+  Future reloadPatAccount() {
+    return _flatInvoke("reloadPatAccount", "");
+  }
+
+  Future bindThisAccount() {
+    return _flatInvoke("bindThisAccount", "");
+  }
+
+  Future clearPat() {
+    return _flatInvoke("clearPat", "");
   }
 }

@@ -13,9 +13,13 @@ import 'package:pikapika/basic/config/ChooserRoot.dart';
 import 'package:pikapika/basic/config/ContentFailedReloadAction.dart';
 import 'package:pikapika/basic/config/DownloadAndExportPath.dart';
 import 'package:pikapika/basic/config/DownloadThreadCount.dart';
+import 'package:pikapika/basic/config/EBookScrolling.dart';
+import 'package:pikapika/basic/config/EBookScrollingRange.dart';
+import 'package:pikapika/basic/config/EBookScrollingTrigger.dart';
 import 'package:pikapika/basic/config/FullScreenAction.dart';
 import 'package:pikapika/basic/config/FullScreenUI.dart';
 import 'package:pikapika/basic/config/ImageAddress.dart';
+import 'package:pikapika/basic/config/ImageFilter.dart';
 import 'package:pikapika/basic/config/KeyboardController.dart';
 import 'package:pikapika/basic/config/NoAnimation.dart';
 import 'package:pikapika/basic/config/PagerAction.dart';
@@ -31,19 +35,26 @@ import 'package:pikapika/basic/config/Themes.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/basic/config/ListLayout.dart';
 import 'package:pikapika/basic/config/TimeOffsetHour.dart';
+import 'package:pikapika/basic/config/UseApiLoadImage.dart';
 import 'package:pikapika/basic/config/UsingRightClickPop.dart';
 import 'package:pikapika/basic/config/Version.dart';
 import 'package:pikapika/basic/config/VolumeController.dart';
 import 'package:pikapika/basic/config/ShadowCategoriesMode.dart';
 import 'package:pikapika/basic/config/WillPopNotice.dart';
+import 'package:pikapika/screens/AccessKeyReplaceScreen.dart';
 import 'package:pikapika/screens/ComicInfoScreen.dart';
 import 'package:pikapika/screens/PkzArchiveScreen.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:uri_to_file/uri_to_file.dart';
 import '../basic/config/DownloadCachePath.dart';
+
+import '../basic/config/ExportPath.dart';
 import '../basic/config/ExportRename.dart';
+import '../basic/config/HiddenFdIcon.dart';
 import '../basic/config/IconLoading.dart';
 import '../basic/config/IsPro.dart';
+import '../basic/config/ReaderBackgroundColor.dart';
+import '../basic/config/WebDav.dart';
 import 'AccountScreen.dart';
 import 'AppScreen.dart';
 import 'DownloadOnlyImportScreen.dart';
@@ -75,6 +86,7 @@ class _InitScreenState extends State<InitScreen> {
     await initQuality();
     await initFont();
     await initTheme();
+    await initFullScreenUI();
     await initListLayout();
     await initReaderType();
     await initReaderDirection();
@@ -84,15 +96,14 @@ class _InitScreenState extends State<InitScreen> {
     await initPagerAction();
     await initShadowCategoriesMode();
     await initShadowCategories();
-    await initFullScreenUI();
     await initIconLoading();
     await initCategoriesColumnCount();
-    switchFullScreenUI();
     await initContentFailedReloadAction();
     await initVolumeController();
     await initKeyboardController();
     await initAndroidDisplayMode();
     await initChooserRoot();
+    await initExportPath();
     await initTimeZone();
     await initDownloadAndExportPath();
     await initAndroidSecureFlag();
@@ -105,8 +116,17 @@ class _InitScreenState extends State<InitScreen> {
     await reloadIsPro();
     autoCheckNewVersion();
     await initWillPopNotice();
+    await initHiddenFdIcon();
     await initShowCommentAtDownload();
     await initDownloadCachePath();
+    await initUseApiLoadImage();
+    await initWebDav();
+    await initImageFilter();
+    await initReaderBackgroundColor();
+    await initEBookScrolling();
+    await initEBookScrollingRange();
+    await initEBookScrollingTrigger();
+
 
     String? initUrl;
     if (Platform.isAndroid || Platform.isIOS) {
@@ -120,24 +140,56 @@ class _InitScreenState extends State<InitScreen> {
       }
     }
     if (initUrl != null) {
-      if (RegExp(r"^pika://comic/([0-9A-z]+)/$").allMatches(initUrl!).isNotEmpty) {
-        String comicId = RegExp(r"^pika://comic/([0-9A-z]+)/$").allMatches(initUrl!).first.group(1)!;
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
+      var parsed = Uri.parse(initUrl!);
+      if (RegExp(r"^pika://access_key/([0-9A-z:\-]+)/$")
+          .allMatches(initUrl!)
+          .isNotEmpty) {
+        String accessKey = RegExp(r"^pika://access_key/([0-9A-z:\-]+)/$")
+            .allMatches(initUrl!)
+            .first
+            .group(1)!;
+        Navigator.of(context).pushReplacement(mixRoute(
+          builder: (BuildContext context) =>
+              AccessKeyReplaceScreen(accessKey: accessKey),
+        ));
+        return;
+      } else if (RegExp(r"^pika://comic/([0-9A-z]+)/$")
+          .allMatches(initUrl!)
+          .isNotEmpty) {
+        String comicId = RegExp(r"^pika://comic/([0-9A-z]+)/$")
+            .allMatches(initUrl!)
+            .first
+            .group(1)!;
+        Navigator.of(context).pushReplacement(mixRoute(
           builder: (BuildContext context) =>
               ComicInfoScreen(comicId: comicId, holdPkz: true),
         ));
         return;
-      } else if (RegExp(r"^.*\.pkz$").allMatches(initUrl!).isNotEmpty) {
+      } else if (RegExp(r"^https?://pika/comic/([0-9A-z]+)/$")
+          .allMatches(initUrl!)
+          .isNotEmpty) {
+        String comicId = RegExp(r"^https?://pika/comic/([0-9A-z]+)/$")
+            .allMatches(initUrl!)
+            .first
+            .group(1)!;
+        Navigator.of(context).pushReplacement(mixRoute(
+          builder: (BuildContext context) =>
+              ComicInfoScreen(comicId: comicId, holdPkz: true),
+        ));
+        return;
+      } else if (RegExp(r"^.*\.pkz$").allMatches(parsed.path).isNotEmpty) {
         File file = await toFile(initUrl!);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
+        Navigator.of(context).pushReplacement(mixRoute(
           builder: (BuildContext context) =>
               PkzArchiveScreen(pkzPath: file.path, holdPkz: true),
         ));
         return;
-      } else if (RegExp(r"^.*\.((pki)|(zip))$").allMatches(initUrl!).isNotEmpty) {
+      } else if (RegExp(r"^.*\.((pki)|(zip))$")
+          .allMatches(parsed.path)
+          .isNotEmpty) {
         File file = await toFile(initUrl!);
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
+          mixRoute(
             builder: (BuildContext context) =>
                 DownloadOnlyImportScreen(path: file.path, holdPkz: true),
           ),
@@ -152,6 +204,7 @@ class _InitScreenState extends State<InitScreen> {
     if (_authenticating) {
       _goAuthentication();
     } else {
+      syncWebDavIfAuto(context);
       _goApplication();
     }
   }
@@ -195,13 +248,13 @@ class _InitScreenState extends State<InitScreen> {
       // 如果token或username+password有效则直接进入登录好的界面
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AppScreen()),
+        mixRoute(builder: (context) => const AppScreen()),
       );
     } else {
       // 否则跳转到登录页
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AccountScreen()),
+        mixRoute(builder: (context) => const AccountScreen()),
       );
     }
   }

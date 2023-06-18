@@ -1,23 +1,21 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pikapika/basic/Common.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/basic/config/IsPro.dart';
-import 'package:pikapika/basic/config/Themes.dart';
 import 'package:pikapika/basic/enum/ErrorTypes.dart';
-import 'package:pikapika/screens/AboutScreen.dart';
 import 'package:pikapika/screens/RegisterScreen.dart';
-import 'package:pikapika/screens/SettingsScreen.dart';
 import 'package:pikapika/screens/components/NetworkSetting.dart';
 
+import '../basic/config/IconLoading.dart';
 import '../basic/config/Version.dart';
 import 'AppScreen.dart';
 import 'DownloadListScreen.dart';
-import 'ThemeScreen.dart';
+import 'ForgotPasswordScreen.dart';
 import 'components/ContentLoading.dart';
+import 'components/ListView.dart';
 
 // 账户设置
 class AccountScreen extends StatefulWidget {
@@ -32,6 +30,7 @@ class _AccountScreenState extends State<AccountScreen> {
   late String _username = "";
   late String _password = "";
   late StreamSubscription<String?> _linkSubscription;
+  late int _versionClick = 0;
 
   @override
   void initState() {
@@ -54,7 +53,6 @@ class _AccountScreenState extends State<AccountScreen> {
   _versionSub(_) {
     versionPop(context);
   }
-
 
   Future _loadProperties() async {
     var username = await method.getUsername();
@@ -82,45 +80,18 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildGui() {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置选项'),
+        title: const Text('配置'),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(
-                    hiddenAccountInfo: true,
-                  ),
-                ),
-              );
-            },
-            icon: const Text('设置'),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AboutScreen(
-                  ),
-                ),
-              );
-            },
-            icon: const Text('关于'),
-          ),
-          IconButton(
-            onPressed: () {
-              if (androidNightModeDisplay) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ThemeScreen()),
-                );
-              } else {
-                chooseLightTheme(context);
-              }
-            },
-            icon: const Text('主题'),
+          SizedBox(
+            width: 80,
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _versionClick++;
+                });
+              },
+              icon: Text(currentVersion()),
+            ),
           ),
           IconButton(
             onPressed: _toDownloadList,
@@ -132,7 +103,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ],
       ),
-      body: ListView(
+      body: PikaListView(
         children: [
           ListTile(
             title: const Text("账号"),
@@ -172,28 +143,43 @@ class _AccountScreenState extends State<AccountScreen> {
             },
           ),
           const NetworkSetting(),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  child: Text.rich(TextSpan(
-                    text: '没有账号,我要注册',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    const RegisterScreen()),
-                          ).then((value) => _loadProperties()),
-                  )),
-                ),
+          ..._versionClick >= 7
+              ? [
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    child: Text.rich(TextSpan(
+                      text: '没有账号,我要注册',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => Navigator.push(
+                              context,
+                              mixRoute(
+                                  builder: (BuildContext context) =>
+                                      const RegisterScreen()),
+                            ).then((value) => _loadProperties()),
+                    )),
+                  ),
+                ]
+              : [],
+          Container(
+            padding: const EdgeInsets.all(15),
+            child: Text.rich(TextSpan(
+              text: '密码找回',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+                decoration: TextDecoration.underline,
               ),
-            ],
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => Navigator.push(
+                      context,
+                      mixRoute(
+                          builder: (BuildContext context) =>
+                              const ForgotPasswordScreen()),
+                    ).then((value) => _loadProperties()),
+            )),
           ),
         ],
       ),
@@ -209,7 +195,7 @@ class _AccountScreenState extends State<AccountScreen> {
       await reloadIsPro();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AppScreen()),
+        mixRoute(builder: (context) => const AppScreen()),
       );
     } catch (e, s) {
       print("$e\n$s");
@@ -226,7 +212,7 @@ class _AccountScreenState extends State<AccountScreen> {
           break;
       }
       if ("$e".contains("email") && "$e".contains("password")) {
-        message = "请检查账号密码";
+        message = "账号或密码错误";
       }
       alertDialog(
         context,
@@ -239,7 +225,7 @@ class _AccountScreenState extends State<AccountScreen> {
   _toDownloadList() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const DownloadListScreen()),
+      mixRoute(builder: (context) => const DownloadListScreen()),
     );
   }
 }

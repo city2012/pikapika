@@ -14,38 +14,34 @@ late String _chooserRoot;
 
 Future<dynamic> initChooserRoot() async {
   _chooserRoot = await method.loadProperty(_propertyName, "");
-}
-
-String _currentChooserRoot() {
-  if (_chooserRoot == "") {
-    if (Platform.isWindows) {
-      return '/';
-    } else if (Platform.isMacOS) {
-      return '/Users';
-    } else if (Platform.isLinux) {
-      return '/';
-    } else if (Platform.isAndroid) {
-      return '/storage/emulated/0';
-    } else {
-      return '';
+  if (_chooserRoot.isEmpty) {
+    if (Platform.isAndroid) {
+      try {
+        _chooserRoot = await method.androidStorageRoot();
+      } catch (e) {
+        _chooserRoot = "/sdcard";
+      }
+    } else if (Platform.isMacOS || Platform.isLinux) {
+      _chooserRoot = await method.getHomeDir();
+    } else if (Platform.isWindows) {
+      _chooserRoot = "/";
     }
   }
-  return _chooserRoot;
 }
 
 Future<String> currentChooserRoot() async {
   if (Platform.isAndroid) {
-    if (androidVersion >= 30) {
-      if (!(await Permission.manageExternalStorage.request()).isGranted) {
-        throw Exception("申请权限被拒绝");
-      }
-    } else {
-      if (!(await Permission.storage.request()).isGranted) {
-        throw Exception("申请权限被拒绝");
-      }
+    late bool g;
+    if (androidVersion < 30) {
+      g = await Permission.storage.request().isGranted;
+    }else{
+      g = await Permission.manageExternalStorage.request().isGranted;
+    }
+    if (!g) {
+      throw Exception("申请权限被拒绝");
     }
   }
-  return _currentChooserRoot();
+  return _chooserRoot;
 }
 
 Future<dynamic> _inputChooserRoot(BuildContext context) async {
@@ -70,7 +66,7 @@ Widget chooserRootSetting() {
     builder: (BuildContext context, void Function(void Function()) setState) {
       return ListTile(
         title: const Text("文件夹选择器默认路径"),
-        subtitle: Text(_currentChooserRoot()),
+        subtitle: Text(_chooserRoot),
         onTap: () async {
           await _inputChooserRoot(context);
           setState(() {});

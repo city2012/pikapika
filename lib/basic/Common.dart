@@ -3,12 +3,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:pikapika/screens/AccessKeyReplaceScreen.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:uri_to_file/uri_to_file.dart';
 
 import '../screens/ComicInfoScreen.dart';
 import '../screens/DownloadOnlyImportScreen.dart';
 import '../screens/PkzArchiveScreen.dart';
+import 'config/IconLoading.dart';
 import 'config/TimeOffsetHour.dart';
 
 /// 默认的图片尺寸
@@ -298,28 +300,49 @@ Future<String?> inputString(BuildContext context, String title,
 StreamSubscription<String?> linkSubscript(BuildContext context) {
   return linkStream.listen((uri) async {
     if (uri == null) return;
-    if (RegExp(r"^pika://comic/([0-9A-z]+)/$").allMatches(uri).isNotEmpty) {
+    var parsed = Uri.parse(uri);
+    if (RegExp(r"^pika://access_key/([0-9A-z:\-]+)/$").allMatches(uri).isNotEmpty) {
+      String accessKey = RegExp(r"^pika://access_key/([0-9A-z:\-]+)/$")
+          .allMatches(uri)
+          .first
+          .group(1)!;
+      Navigator.of(context).push(
+        mixRoute(
+          builder: (BuildContext context) => AccessKeyReplaceScreen(accessKey: accessKey),
+        ),
+      );
+    } else if (RegExp(r"^pika://comic/([0-9A-z]+)/$").allMatches(uri).isNotEmpty) {
       String comicId = RegExp(r"^pika://comic/([0-9A-z]+)/$")
           .allMatches(uri)
           .first
           .group(1)!;
       Navigator.of(context).push(
-        MaterialPageRoute(
+        mixRoute(
           builder: (BuildContext context) => ComicInfoScreen(comicId: comicId),
         ),
       );
-    } else if (RegExp(r"^.*\.pkz$").allMatches(uri).isNotEmpty) {
+    } else if (RegExp(r"^https?://pika/comic/([0-9A-z]+)/$").allMatches(uri).isNotEmpty) {
+      String comicId = RegExp(r"^https?://pika/comic/([0-9A-z]+)/$")
+          .allMatches(uri)
+          .first
+          .group(1)!;
+      Navigator.of(context).push(
+        mixRoute(
+          builder: (BuildContext context) => ComicInfoScreen(comicId: comicId),
+        ),
+      );
+    } else if (RegExp(r"^.*\.pkz$").allMatches(parsed.path).isNotEmpty) {
       File file = await toFile(uri);
       Navigator.of(context).push(
-        MaterialPageRoute(
+        mixRoute(
           builder: (BuildContext context) =>
               PkzArchiveScreen(pkzPath: file.path),
         ),
       );
-    } else if (RegExp(r"^.*\.((pki)|(zip))$").allMatches(uri).isNotEmpty) {
+    } else if (RegExp(r"^.*\.((pki)|(zip))$").allMatches(parsed.path).isNotEmpty) {
       File file = await toFile(uri);
       Navigator.of(context).push(
-        MaterialPageRoute(
+        mixRoute(
           builder: (BuildContext context) =>
               DownloadOnlyImportScreen(path: file.path),
         ),

@@ -11,6 +11,7 @@ import 'package:pikapika/screens/components/CommentMainType.dart';
 import 'package:pikapika/screens/components/ItemBuilder.dart';
 import 'package:pikapika/screens/components/Recommendation.dart';
 
+import '../basic/config/IconLoading.dart';
 import 'ComicReaderScreen.dart';
 import 'DownloadConfirmScreen.dart';
 import 'components/ComicDescriptionCard.dart';
@@ -20,6 +21,7 @@ import 'components/CommentList.dart';
 import 'components/ContentError.dart';
 import 'components/ContentLoading.dart';
 import 'components/ContinueReadButton.dart';
+import 'components/ListView.dart';
 import 'components/RightClickPop.dart';
 
 // 漫画详情
@@ -145,7 +147,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
                 _buildDownloadAction(_epListFuture, _comicInfo),
               ],
             ),
-            body: ListView(
+            body: PikaListView(
               children: [
                 ComicInfoCard(_comicInfo, linkItem: true),
                 ComicTagsCard(_comicInfo.tags),
@@ -285,7 +287,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
           onPressed: () async {
             Navigator.push(
               context,
-              MaterialPageRoute(
+              mixRoute(
                 builder: (context) => DownloadConfirmScreen(
                   comicInfo: _comicInfo,
                   epList: _epList.reversed.toList(),
@@ -356,7 +358,7 @@ class _ComicInfoScreenState extends State<ComicInfoScreen> with RouteAware {
   void _push(ComicInfo comicInfo, List<Ep> epList, int order, int? rank) {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      mixRoute(
         builder: (context) => ComicReaderScreen(
           comicInfo: comicInfo,
           epList: epList,

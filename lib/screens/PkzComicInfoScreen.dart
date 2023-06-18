@@ -1,17 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:pikapika/basic/Entities.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/screens/PkzReaderScreen.dart';
-import 'package:uni_links/uni_links.dart';
-import 'package:uri_to_file/uri_to_file.dart';
 
 import '../basic/Common.dart';
 import '../basic/Navigator.dart';
-import 'PkzArchiveScreen.dart';
+import '../basic/config/IconLoading.dart';
+import 'components/ListView.dart';
 import 'components/PkzComicInfoCard.dart';
 
 class PkzComicInfoScreen extends StatefulWidget {
@@ -89,7 +87,7 @@ class _PkzComicInfoScreenState extends State<PkzComicInfoScreen>
       for (var chapter in volume.chapters) {
         chapterButtons.add(MaterialButton(
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
+            Navigator.of(context).push(mixRoute(
               builder: (BuildContext context) {
                 return PkzReaderScreen(
                   comicInfo: widget.pkzComic,
@@ -115,7 +113,7 @@ class _PkzComicInfoScreenState extends State<PkzComicInfoScreen>
           widget.pkzComic.title,
         ),
       ),
-      body: ListView(children: [
+      body: PikaListView(children: [
         PkzComicInfoCard(info: widget.pkzComic, pkzPath: widget.pkzPath),
         Container(
           padding: const EdgeInsets.only(top: 5, bottom: 5),
@@ -206,7 +204,7 @@ class _PkzComicInfoScreenState extends State<PkzComicInfoScreen>
               child: MaterialButton(
                 onPressed: () {
                   if (chapters.containsKey(_log?.lastViewEpId)) {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.of(context).push(mixRoute(
                       builder: (BuildContext context) {
                         return PkzReaderScreen(
                           comicInfo: widget.pkzComic,
@@ -218,7 +216,7 @@ class _PkzComicInfoScreenState extends State<PkzComicInfoScreen>
                     ));
                     return;
                   }
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(mixRoute(
                     builder: (BuildContext context) {
                       return PkzReaderScreen(
                         comicInfo: widget.pkzComic,

@@ -3,9 +3,11 @@ import 'package:pikapika/basic/Common.dart';
 
 import '../basic/Entities.dart';
 import '../basic/Method.dart';
+import '../basic/config/IconLoading.dart';
 import 'DownloadExportingGroupScreen.dart';
 import 'components/ContentLoading.dart';
 import 'components/DownloadInfoCard.dart';
+import 'components/ListView.dart';
 
 class DownloadExportGroupScreen extends StatefulWidget {
   const DownloadExportGroupScreen({Key? key}) : super(key: key);
@@ -15,7 +17,7 @@ class DownloadExportGroupScreen extends StatefulWidget {
 }
 
 class _DownloadExportGroupScreenState extends State<DownloadExportGroupScreen> {
-  late Future<List<DownloadComic>> _f = method.allDownloads();
+  late Future<List<DownloadComic>> _f = method.allDownloads("");
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +70,10 @@ class _DownloadExportGroupScreenState extends State<DownloadExportGroupScreen> {
             onRefresh: () async {
               setState(() {
                 selected.clear();
-                _f = method.allDownloads();
+                _f = method.allDownloads("");
               });
             },
-            child: ListView(
+            child: PikaListView(
               children: ws,
             ),
           ),
@@ -104,7 +106,10 @@ class _DownloadExportGroupScreenState extends State<DownloadExportGroupScreen> {
               selected.contains(e.id)
                   ? Icons.check_circle_sharp
                   : Icons.circle_outlined,
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .secondary,
             ),
           ),
         ]),
@@ -151,10 +156,11 @@ class _DownloadExportGroupScreenState extends State<DownloadExportGroupScreen> {
             return;
           }
           final exported = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => DownloadExportingGroupScreen(
-                idList: selected,
-              ),
+            mixRoute(
+              builder: (context) =>
+                  DownloadExportingGroupScreen(
+                    idList: selected,
+                  ),
             ),
           );
         },

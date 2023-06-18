@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart' as fsb;
 import 'package:pikapika/basic/Channels.dart';
 import 'package:pikapika/basic/Common.dart';
 import 'package:pikapika/basic/Entities.dart';
 import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/screens/DownloadExportGroupScreen.dart';
+import '../basic/config/IconLoading.dart';
 import 'DownloadImportScreen.dart';
 import 'DownloadInfoScreen.dart';
 import 'components/ContentLoading.dart';
 import 'components/DownloadInfoCard.dart';
+import 'components/ListView.dart';
 import 'components/RightClickPop.dart';
 
 // 下载列表
@@ -22,9 +25,33 @@ class DownloadListScreen extends StatefulWidget {
 }
 
 class _DownloadListScreenState extends State<DownloadListScreen> {
+  String _search = "";
+  late final fsb.SearchBar _searchBar = fsb.SearchBar(
+    hintText: '搜索下载',
+    inBar: false,
+    setState: setState,
+    onSubmitted: (value) {
+      _search = value;
+      _f = method.allDownloads(_search);
+      _searchBar.controller.text = value;
+    },
+    buildDefaultAppBar: (BuildContext context) {
+      return AppBar(
+        title: Text(_search == "" ? "下载列表" : ('搜索下载 - $_search')),
+        actions: [
+          _searchBar.getSearchAction(context),
+          exportButton(),
+          importButton(),
+          resetFailedButton(),
+          pauseButton(),
+        ],
+      );
+    },
+  );
+
   DownloadComic? _downloading;
   late bool _downloadRunning = false;
-  late Future<List<DownloadComic>> _f = method.allDownloads();
+  late Future<List<DownloadComic>> _f = method.allDownloads(_search);
 
   void _onMessageChange(String event) {
     print("EVENT");
@@ -57,15 +84,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
   @override
   Widget build(BuildContext context) {
     final screen = Scaffold(
-      appBar: AppBar(
-        title: const Text('下载列表'),
-        actions: [
-          exportButton(),
-          importButton(),
-          resetFailedButton(),
-          pauseButton(),
-        ],
-      ),
+      appBar: _searchBar.build(context),
       body: FutureBuilder(
         future: _f,
         builder: (BuildContext context,
@@ -97,10 +116,10 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
           return RefreshIndicator(
             onRefresh: () async {
               setState(() {
-                _f = method.allDownloads();
+                _f = method.allDownloads(_search);
               });
             },
-            child: ListView(
+            child: PikaListView(
               children: [
                 ...data.map(downloadWidget),
               ],
@@ -124,7 +143,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         }
         Navigator.push(
           context,
-          MaterialPageRoute(
+          mixRoute(
             builder: (context) => DownloadInfoScreen(
               comicId: e.id,
               comicTitle: e.title,
@@ -151,7 +170,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
+            mixRoute(
               builder: (context) => const DownloadExportGroupScreen(),
             ),
           );
@@ -178,12 +197,12 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
+            mixRoute(
               builder: (context) => const DownloadImportScreen(),
             ),
           );
           setState(() {
-            _f = method.allDownloads();
+            _f = method.allDownloads(_search);
           });
         },
         icon: Column(
@@ -262,7 +281,7 @@ class _DownloadListScreenState extends State<DownloadListScreen> {
         onPressed: () async {
           await method.resetFailed();
           setState(() {
-            _f = method.allDownloads();
+            _f = method.allDownloads(_search);
           });
           defaultToast(context, "所有失败的下载已经恢复");
         },

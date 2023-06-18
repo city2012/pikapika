@@ -13,7 +13,10 @@ import 'package:uri_to_file/uri_to_file.dart';
 
 import '../basic/Common.dart';
 import '../basic/Navigator.dart';
+import '../basic/config/IconLoading.dart';
+import '../basic/config/Platform.dart';
 import 'PkzComicInfoScreen.dart';
+import 'components/ListView.dart';
 
 class PkzArchiveScreen extends StatefulWidget {
   final bool holdPkz;
@@ -74,13 +77,20 @@ class _PkzArchiveScreenState extends State<PkzArchiveScreen> with RouteAware {
 
   Future _load() async {
     await method.viewPkz(_fileName, widget.pkzPath);
-    var p = await Permission.storage.request();
-    if (!p.isGranted) {
-      throw 'error permission';
+    if (Platform.isAndroid) {
+      late bool g;
+      if (androidVersion < 30) {
+        g = await Permission.storage.request().isGranted;
+      }else{
+        g = await Permission.manageExternalStorage.request().isGranted;
+      }
+      if (!g) {
+        throw 'error permission';
+      }
     }
     _info = await method.pkzInfo(widget.pkzPath);
     if (_info.comics.length == 1) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
+      Navigator.of(context).pushReplacement(mixRoute(
         builder: (BuildContext context) => PkzComicInfoScreen(
           pkzPath: widget.pkzPath,
           pkzComic: _info.comics.first,
@@ -113,12 +123,12 @@ class _PkzArchiveScreenState extends State<PkzArchiveScreen> with RouteAware {
           BuildContext context,
           AsyncSnapshot snapshot,
         ) {
-          return ListView(children: [
+          return PikaListView(children: [
             ..._info.comics
                 .map((e) => GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
+                        Navigator.of(context).push(mixRoute(
                           builder: (BuildContext context) {
                             return PkzComicInfoScreen(
                               pkzComic: e,

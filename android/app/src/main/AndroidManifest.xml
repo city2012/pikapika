@@ -1,13 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="niuhuan.pikapika">
+    package="opensource.pikapika">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
     <queries>
         <intent>
@@ -20,11 +20,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="pikapika"
         android:requestLegacyExternalStorage="true">
-        <!-- requestLegacyExternalStorage="true" api29 down -->
         <activity
-            android:name="niuhuan.pikapika.MainActivity"
-            android:exported="true"
+            android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
@@ -44,6 +43,7 @@
             <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
                 android:resource="@drawable/launch_background" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -52,36 +52,51 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="pika" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="pika" />
-
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
                 <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.pkz"
-                        android:scheme="content" />
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:scheme="content"></data>
+                <data android:pathPattern=".*\.pkz"></data>
+                <data android:pathPattern=".*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\.pki"></data>
+                <data android:pathPattern=".*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\..*\.pki"></data>
                 <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.pkz"
-                        android:scheme="file" />
-
-                <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.pki"
-                        android:scheme="content" />
-                <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.pki"
-                        android:scheme="file" />
-
-                <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.zip"
-                        android:scheme="content" />
-                <data
-                        android:mimeType="*/*"
-                        android:pathPattern=".*\\.zip"
-                        android:scheme="file" />
-
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:scheme="file"></data>
+                <data android:pathPattern=".*\.pkz"></data>
+                <data android:pathPattern=".*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\..*\.pkz"></data>
+                <data android:pathPattern=".*\.pki"></data>
+                <data android:pathPattern=".*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\.pki"></data>
+                <data android:pathPattern=".*\..*\..*\..*\..*\..*\.pki"></data>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
@@ -91,8 +106,8 @@
             android:value="2" />
         <!-- image_cropper -->
         <activity
-                android:name="com.yalantis.ucrop.UCropActivity"
-                android:screenOrientation="portrait"
-                android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>

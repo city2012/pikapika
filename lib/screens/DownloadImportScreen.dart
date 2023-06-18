@@ -9,9 +9,12 @@ import 'package:pikapika/basic/Method.dart';
 import 'package:pikapika/basic/config/ChooserRoot.dart';
 
 import '../basic/Cross.dart';
+import '../basic/config/IconLoading.dart';
+import '../basic/config/ImportNotice.dart';
 import '../basic/config/IsPro.dart';
 import 'PkzArchiveScreen.dart';
 import 'components/ContentLoading.dart';
+import 'components/ListView.dart';
 import 'components/RightClickPop.dart';
 
 // 导入
@@ -62,23 +65,25 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
       );
     }
 
-    List<Widget> actions = [];
-
-    actions.add(_fileImportButton());
-    actions.add(_networkImportButton());
-    actions.add(_importDirFilesZipButton());
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('导入'),
       ),
-      body: ListView(
+      body: PikaListView(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             child: Text(_importMessage),
           ),
-          ...actions,
+          Container(height: 20),
+          importNotice(context),
+          Container(height: 20),
+          _fileImportButton(),
+          Container(height: 20),
+          _networkImportButton(),
+          Container(height: 20),
+          _importDirFilesZipButton(),
+          Container(height: 40),
         ],
       ),
     );
@@ -120,7 +125,7 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
         if (path != null) {
           if (path.endsWith(".pkz")) {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              mixRoute(
                 builder: (BuildContext context) =>
                     PkzArchiveScreen(pkzPath: path!),
               ),
@@ -150,10 +155,20 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
           }
         }
       },
-      child: const Text(
-        '选择zip文件进行导入\n选择pki文件进行导入\n选择pkz文件进行阅读',
-        style: TextStyle(),
-        textAlign: TextAlign.center,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            width: constraints.maxWidth,
+            padding: const EdgeInsets.only(top: 15, bottom: 15),
+            color:
+                (Theme.of(context).textTheme.bodyText1?.color ?? Colors.black)
+                    .withOpacity(.05),
+            child: const Text(
+              '选择zip文件进行导入\n选择pki文件进行导入\n选择pkz文件进行阅读',
+              textAlign: TextAlign.center,
+            ),
+          );
+        },
       ),
     );
   }
@@ -184,7 +199,21 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
           }
         }
       },
-      child: const Text('从其他设备导入'),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            width: constraints.maxWidth,
+            padding: const EdgeInsets.only(top: 15, bottom: 15),
+            color:
+                (Theme.of(context).textTheme.bodyText1?.color ?? Colors.black)
+                    .withOpacity(.05),
+            child: const Text(
+              '从其他设备导入',
+              textAlign: TextAlign.center,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -219,10 +248,20 @@ class _DownloadImportScreenState extends State<DownloadImportScreen> {
           }
         }
       },
-      child: Text(
-        '选择文件夹\n(导入里面所有的zip/pki)' + (!isPro ? "\n(发电后使用)" : ""),
-        style: TextStyle(),
-        textAlign: TextAlign.center,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            width: constraints.maxWidth,
+            padding: const EdgeInsets.only(top: 15, bottom: 15),
+            color:
+                (Theme.of(context).textTheme.bodyText1?.color ?? Colors.black)
+                    .withOpacity(.05),
+            child: Text(
+              '选择文件夹\n(导入里面所有的zip/pki)' + (!isPro ? "\n(发电后使用)" : ""),
+              textAlign: TextAlign.center,
+            ),
+          );
+        },
       ),
     );
   }
